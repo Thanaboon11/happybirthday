@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday! สุขสันต์วันเกิด</title>
+    <style>
+        /* --- CSS: การออกแบบทั้งหมด --- */
+        
+        /* 1. องค์ประกอบพื้นฐาน */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #fce4ec; /* สีชมพูอ่อนมาก */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* ใช้ min-height เพื่อให้พอดีกับมือถือและทุกอุปกรณ์ */
+            min-height: 100vh; 
+            margin: 0;
+            text-align: center;
+        }
+        .screen {
+            background-color: white;
+            padding: 20px 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0 0 0 / 10%);
+            width: 300px;
+            box-sizing: border-box;
+            max-width: 95%; 
+            margin: 20px 0;
+        }
+        .hidden {
+            display: none !important;
+        }
+        
+        /* 2. หน้าจอพาสโค้ด */
+        #passcode-screen h2 {
+            color: #d81b60; 
+            margin-top: 0; 
+            font-size: 1.5rem;
+        }
+        #passcode-screen p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px; 
+        }
+        #small-cake {
+            font-size: 3rem;
+            margin-bottom: 15px; 
+            display: block;
+        }
+        
+        /* 3. แป้นพิมพ์ตัวเลข */
+        #passcode-display {
+            background-color: #f9f9f9;
+            border: 2px solid #f8bbd0;
+            border-radius: 15px;
+            height: 50px;
+            width: 90%; 
+            margin: 15px auto; 
+            font-size: 2.2rem;
+            line-height: 50px;
+            color: #555;
+            box-sizing: border-box;
+            padding: 0 5px; 
+            user-select: none;
+            display: flex;
+            justify-content: space-around; 
+            align-items: center;
+            text-align: center;
+        }
+        .passcode-digit {
+            /* กำหนดความกว้างคงที่ต่อ 1 ตัวเลข */
+            width: 8%; 
+            border-bottom: 3px solid #d81b60;
+            margin: 0 1px;
+            height: 35px; 
+            line-height: 35px;
+            font-weight: bold;
+        }
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px; 
+            max-width: 240px;
+            margin: 15px auto; 
+        }
+        .key, .key-control {
+            font-size: 1.4rem; 
+            background-color: #ff80ab; 
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px; 
+            height: 60px; 
+            line-height: 60px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 3px 6px rgba(0 0 0 / 10%);
+        }
+        .key:active, .key-control:active {
+            background-color: #f50057;
+            transform: scale(0.95);
+        }
+        .keypad-controls button {
+            background-color: transparent;
+            color: #d81b60;
+            font-size: 1rem;
+            margin-top: 5px;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        
+        /* 4. หน้าจอเค้ก */
+        #cake-screen h2 {
+            color: #d81b60;
+        }
+        #cake-container {
+            position: relative;
+            width: 100%; 
+            height: 250px; 
+            margin: 0 auto;
+            cursor: pointer;
+        }
+        
+        /* 4.1 เค้ก SVG (3D Illusion) */
+        #cake-svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); 
+        }
+
+        /* 4.3 เทียน (เปลวไฟแบบใหม่) */
+        .candle-flame {
+            transition: opacity 0.3s;
+            animation: flicker 0.5s infinite alternate; 
+            transform-origin: 50% 100%; 
+        }
+        @keyframes flicker {
+            0% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+            50% { transform: scale(1.05) rotate(1deg); opacity: 1; }
+            100% { transform: scale(0.95) rotate(-1deg); opacity: 0.8; }
+        }
+        .candle {
+            opacity: 0; 
+            transition: opacity 0.5s;
+        }
+
+        /* 5. จดหมายที่ถูกย้ายมาอยู่ตรงกลาง */
+        #small-letter {
+            /* ลบ absolute positioning เดิมออก */
+            margin: 15px auto; /* จัดให้อยู่ตรงกลางและมีระยะห่าง */
+            display: block;
+            cursor: pointer;
+            z-index: 10; 
+        }
+        
+        /* 6. ข้อความคำแนะนำ (ให้มีระยะห่างจากเค้ก) */
+        #instruction-message {
+            min-height: 50px; /* จองพื้นที่ไว้ไม่ให้ layout ขยับ */
+            margin-top: 15px;
+        }
+
+        /* 7. หน้าจอการ์ดอวยพร */
+        #card-screen {
+            padding: 20px;
+            background-color: white;
+            max-width: 350px;
+            width: 90%;
+        }
+        .card-content {
+            border: 3px solid #f8bbd0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+            background-color: #fffafa;
+        }
+        #card-screen h2 {
+            color: #d81b60;
+        }
+        #card-screen img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. หน้าจอใส่รหัสผ่าน -->
+    <div id="passcode-screen" class="screen">
+        <span id="small-cake">🎂</span>
+        <h2>สุขสันต์วันเกิด💕🍰</h2>
+        <p>ใส่รหัส เพื่อปลดล็อก 000000</p>
+        
+        <!-- ช่องแสดงรหัสผ่าน -->
+        <div id="passcode-display"></div>
+
+        <div class="keypad">
+            <button class="key" onclick="pressKey('1')">1</button>
+            <button class="key" onclick="pressKey('2')">2</button>
+            <button class="key" onclick="pressKey('3')">3</button>
+            <button class="key" onclick="pressKey('4')">4</button>
+            <button class="key" onclick="pressKey('5')">5</button>
+            <button class="key" onclick="pressKey('6')">6</button>
+            <button class="key" onclick="pressKey('7')">7</button>
+            <button class="key" onclick="pressKey('8')">8</button>
+            <button class="key" onclick="pressKey('9')">9</button>
+            <button class="key" onclick="pressKey('*')">*</button>
+            <button class="key" onclick="pressKey('0')">0</button>
+            <button class="key" onclick="pressKey('#')">#</button>
+        </div>
+        <div class="keypad-controls">
+            <button class="key-control" onclick="deleteKey()">ลบ</button>
+        </div>
+    </div>
+
+    <!-- 2. หน้าจอเค้ก -->
+    <div id="cake-screen" class="screen hidden">
+        <h2>กดที่เค้กสิ! ปักเทียนตามใจชอบ</h2>
+        <p id="cake-message">ปักได้อีก 5 ครั้ง</p>
+        
+        <!-- จดหมายถูกย้ายมาอยู่ตรงกลางระหว่างข้อความและเค้ก -->
+        <svg id="small-letter" onclick="openCard(event)" width="80" height="80" viewBox="0 0 100 100" class="hidden">
+            <!-- ซองจดหมายสีดำ -->
+            <rect x="5" y="25" width="90" height="60" fill="#212121" rx="5"/>
+            <!-- ส่วนปิดซองสีชมพู (หัวใจ) -->
+            <polygon points="50,5 5,25 95,25" fill="#d81b60"/>
+            <!-- หัวใจเล็กๆ ตรงกลาง (เพิ่มความน่ารัก) -->
+            <path d="M50,45 L55,40 A7,7 0 0,1 65,40 A7,7 0 0,1 65,50 L50,65 L35,50 A7,7 0 0,1 35,40 A7,7 0 0,1 45,40 Z" fill="#ffcdd2"/>
+            <text x="50" y="80" font-size="12" fill="#fff" text-anchor="middle">แตะ</text>
+        </svg>
+
+        <div id="cake-container" onclick="addCandle(event)">
+            <!-- SVG Cake Drawing -->
+            <svg id="cake-svg" width="300" height="250" viewBox="0 0 400 250"> 
+                
+                <!-- ฐานเค้กสีดำ -->
+                <ellipse cx="200" cy="220" rx="150" ry="20" fill="#212121" /> 
+                
+                <!-- ตัวเค้กชั้นล่าง (L2) - สีชมพูอ่อน -->
+                <rect x="50" y="130" width="300" height="90" fill="#f8bbd0" /> 
+                <!-- ขอบชั้นล่าง -->
+                <ellipse cx="200" cy="130" rx="150" ry="10" fill="#ffcdd2" /> 
+                
+                <!-- ตัวเค้กชั้นบน (L1) - สีดำ (ตามรูปตัวอย่าง) -->
+                <rect x="100" y="50" width="200" height="80" fill="#212121" /> 
+                <!-- ขอบบนสุด (ครีม) - สีชมพูเข้ม -->
+                <ellipse cx="200" cy="50" rx="100" ry="10" fill="#d81b60" /> 
+                
+                <!-- เกล็ด/ตกแต่งสีชมพูตามขอบ (Sprockets/Waves) -->
+                <path d="M100,130 C120,135 140,125 160,130 C180,135 200,125 220,130 C240,135 260,125 280,130 C300,135 320,125 340,130" 
+                      fill="none" stroke="#d81b60" stroke-width="4" stroke-linecap="round"/>
+                
+                <!-- เทียนจะถูกสร้างและแทรกที่นี่ด้วย JavaScript -->
+                
+            </svg>
+        </div>
+        <!-- ข้อความคำแนะนำ (จะแสดงเมื่อจดหมายปรากฏ) -->
+        <div id="instruction-message"></div>
+    </div>
+
+    <!-- 3. หน้าจอการ์ดอวยพร -->
+    <div id="card-screen" class="screen hidden">
+        <h2>สุขสันต์วันเกิดนะ 💕</h2>
+        <div class="card-content">
+            <p>
+                วันเกิดปีนี้มีคำขอให้มีความสุขมากๆ <br>
+                คิดสิ่งใดขอให้สมปรารถนา <br>
+                祝你生日快乐  天天开心<br>
+                 ❤️
+        </p>
+       </p>
+            <!-- QR Code (Placeholder - ปรับขนาดเป็น 150x150) -->
+            <!-- ******* ปรับขนาด QR Code เป็น 150x150 ******* -->
+            <img src="2.jpg" alt="QR Code Link" style="width: 170px; height: 190px;">
+            
+            <!-- รูปภาพประกอบ (Placeholder - ปรับขนาดเป็น 300x300 เพื่อให้เป็นสี่เหลี่ยมจัตุรัส) -->
+            <!-- ******* ปรับขนาดรูปคู่เป็น 300x300 ******* -->
+            <img src="1.gif?text=ใส่รูปคู่แทนได้นะ" alt="ภาพคู่" onerror="this.onerror=null; this.src='1.giftext=Error%20Image';">
+        </div>
+    </div>
+    
+    
+    
+    
+    <script>
+        // --- JavaScript: ตรรกะการทำงาน ---
+
+        // 🎂 ส่วนที่ 1: ตั้งค่า
+        const correctPasscode = "000000"; 
+        const passcodeLength = correctPasscode.length;
+        let enteredPasscode = ""; 
+        const totalCandles = 5;
+        let candleCount = 0; 
+        
+        const candleColors = ["#80cbc4", "#fff59d", "#ff8a65", "#ce93d8", "#e6ee9c"]; 
+        
+        const CAKE_TOP_Y = 50; 
+        const CAKE_TOP_WIDTH = 200; 
+        const CAKE_LEFT_X = 100;
+
+        // 🎂 ส่วนที่ 2: ฟังก์ชันสำหรับ Keypad
+        function pressKey(key) {
+            if (enteredPasscode.length < passcodeLength) {
+                enteredPasscode += key;
+                updatePasscodeDisplay();
+
+                if (enteredPasscode.length === passcodeLength) {
+                    checkPasscode();
+                }
+            }
+        }
+
+        function deleteKey() {
+            enteredPasscode = enteredPasscode.slice(0, -1);
+            updatePasscodeDisplay();
+        }
+
+        function updatePasscodeDisplay() {
+            const displayElement = document.getElementById("passcode-display");
+            displayElement.innerHTML = ''; 
+
+            for (let i = 0; i < passcodeLength; i++) {
+                const digitDiv = document.createElement('div');
+                digitDiv.classList.add('passcode-digit');
+                
+                if (i < enteredPasscode.length) {
+                    digitDiv.textContent = enteredPasscode[i];
+                } else {
+                    digitDiv.textContent = ' '; // ช่องว่างที่มีเส้นใต้
+                }
+                displayElement.appendChild(digitDiv);
+            }
+        }
+
+        function checkPasscode() {
+            setTimeout(() => {
+                if (enteredPasscode === correctPasscode) {
+                    document.getElementById("passcode-screen").classList.add("hidden");
+                    document.getElementById("cake-screen").classList.remove("hidden");
+                } else {
+                    const messageBox = document.createElement('div');
+                    messageBox.textContent = "รหัสไม่ถูกต้อง! ลองอีกครั้งนะ";
+                    messageBox.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #d81b60; color: white; padding: 15px 30px; border-radius: 10px; z-index: 9999; box-shadow: 0 4px 10px rgba(0,0,0,0.3);';
+                    document.body.appendChild(messageBox);
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(messageBox);
+                    }, 1500); 
+
+                    enteredPasscode = "";
+                    updatePasscodeDisplay();
+                }
+            }, 300);
+        }
+        
+        window.onload = updatePasscodeDisplay;
+
+        // 🎂 ส่วนที่ 3: การทำงานบนเค้ก
+        function addCandle(event) {
+            if (candleCount < totalCandles) {
+                
+                const container = document.getElementById('cake-container');
+                const containerRect = container.getBoundingClientRect();
+                
+                const x = event.clientX - containerRect.left; 
+                const svgX = x * (400 / containerRect.width);
+
+                // ** ตอนนี้การคลิกจะทำงานบนพื้นที่เค้กทั้งหมดแล้ว **
+
+                const candleHeight = Math.floor(Math.random() * 21) + 35; 
+                const randomColor = candleColors[Math.floor(Math.random() * candleColors.length)];
+
+                // กำหนดตำแหน่ง Y ให้เทียนปักบนขอบเค้กบนสุดเสมอ (CAKE_TOP_Y = 50 ใน viewBox)
+                const T_X = svgX; 
+                const T_Y = CAKE_TOP_Y; 
+                
+                const svg = document.getElementById('cake-svg');
+
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', 'candle');
+                g.setAttribute('transform', `translate(${T_X}, ${T_Y - candleHeight})`); 
+
+                // แท่งเทียน (Rect)
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', '-3'); 
+                rect.setAttribute('y', '0'); 
+                rect.setAttribute('width', '6');
+                rect.setAttribute('height', candleHeight.toString());
+                rect.setAttribute('rx', '1'); 
+                rect.setAttribute('ry', '1');
+                rect.setAttribute('fill', randomColor); 
+                rect.setAttribute('class', 'candle-wax'); 
+
+                // เปลวเทียน (วงกลม)
+                const flame = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                flame.setAttribute('cx', '0');
+                flame.setAttribute('cy', '-2');
+                flame.setAttribute('r', '3');
+                flame.setAttribute('fill', '#ff9800'); 
+                flame.setAttribute('class', 'candle-flame'); 
+
+                // แสงเปลวเทียน (วงกลมเล็ก)
+                const innerFlame = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                innerFlame.setAttribute('cx', '0');
+                innerFlame.setAttribute('cy', '-2');
+                innerFlame.setAttribute('r', '1.5');
+                innerFlame.setAttribute('fill', '#ffeb3b'); 
+                innerFlame.setAttribute('class', 'candle-flame'); 
+                innerFlame.style.animationDelay = '-0.2s'; 
+
+                g.appendChild(rect);
+                g.appendChild(flame);
+                g.appendChild(innerFlame);
+                svg.appendChild(g);
+
+                candleCount++;
+                
+                setTimeout(() => {
+                    g.style.opacity = 1;
+                }, 10);
+                
+                const messageElement = document.getElementById("cake-message");
+                const remaining = totalCandles - candleCount;
+                messageElement.textContent = `ปักได้อีก ${remaining} ครั้ง`;
+
+                if (candleCount === totalCandles) {
+                    // ซ่อนข้อความ "ปักได้อีก..." ทันที
+                    messageElement.classList.add('hidden'); 
+                    showLetter();
+                }
+            }
+        }
+
+        function showLetter() {
+            const letter = document.getElementById("small-letter");
+            const instructionMessage = document.getElementById("instruction-message");
+            
+            setTimeout(() => {
+                // เปลี่ยนเป็นการนำ class 'hidden' ออก เพื่อให้จดหมายปรากฏอยู่ตรงกลาง
+                letter.classList.remove('hidden');
+
+                // แสดงข้อความคำแนะนำ
+                instructionMessage.innerHTML = `
+                    <p style="color: #d81b60; font-weight: bold;">
+                        เย้! ครบแล้ว อธิษฐานก่อนนะ 🥳
+                    </p>
+                    <p style="color: #d81b60; font-weight: bold; margin-top: 5px;">
+                        💌 คลิกที่จดหมายเพื่ออ่านคำอวยพร
+                    </p>
+                `;
+            }, 500);
+        }
+
+        function openCard(event) {
+            event.stopPropagation(); 
+            
+            // ตรวจสอบว่าจดหมายถูกแสดงแล้วหรือไม่ (โดยการเช็คว่าไม่มี class 'hidden')
+            if (!document.getElementById("small-letter").classList.contains('hidden')) {
+                document.getElementById("cake-screen").classList.add("hidden");
+                document.getElementById("card-screen").classList.remove("hidden");
+            }
+        }
+
+    </script>
+
+</body>
+</html>
